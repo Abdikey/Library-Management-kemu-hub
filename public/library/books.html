@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Books | SchoolLib Library Management System</title>
+  <meta name="description" content="Add, edit, search and delete books in the school library catalogue." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <aside class="sidebar"></aside>
+  <div class="backdrop"></div>
+
+  <div class="main">
+    <header class="topbar">
+      <button class="hamburger" aria-label="Open menu">☰</button>
+      <div><h1>Books</h1><p>The library catalogue</p></div>
+      <div class="topbar-actions">
+        <button class="btn btn-light" id="print-btn">🖨️ Print</button>
+        <button class="btn" id="add-btn">+ Add book</button>
+      </div>
+    </header>
+
+    <main class="content">
+      <section class="card">
+        <div class="card-head toolbar">
+          <label class="sr-only" for="search" hidden>Search books</label>
+          <input id="search" type="search" placeholder="Search title, author or ISBN…" aria-label="Search books" />
+          <label for="category-filter" hidden>Category</label>
+          <select id="category-filter" aria-label="Filter by category"><option value="">All categories</option></select>
+          <span class="spacer"></span>
+          <span class="badge badge-grey" id="count">0 books</span>
+        </div>
+        <div id="table"></div>
+      </section>
+    </main>
+
+    <footer class="page-footer">SchoolLib &mdash; Library Management System school project.</footer>
+  </div>
+
+  <!-- Add / edit book modal -->
+  <div class="modal" id="book-modal" role="dialog" aria-modal="true" aria-labelledby="book-modal-title">
+    <div class="modal-box">
+      <div class="modal-head">
+        <h3 id="book-modal-title">Add book</h3>
+        <button class="modal-close" data-close="true" aria-label="Close">&times;</button>
+      </div>
+      <form id="book-form">
+        <div class="field"><label for="title">Title *</label><input id="title" required /></div>
+        <div class="form-row">
+          <div class="field"><label for="author">Author *</label><input id="author" required /></div>
+          <div class="field"><label for="isbn">ISBN * (must be unique)</label><input id="isbn" required /></div>
+        </div>
+        <div class="form-row">
+          <div class="field"><label for="category">Category *</label>
+            <select id="category" required>
+              <option value="Fiction">Fiction</option>
+              <option value="Science">Science</option>
+              <option value="Mathematics">Mathematics</option>
+              <option value="History">History</option>
+              <option value="Technology">Technology</option>
+              <option value="Literature">Literature</option>
+              <option value="Biography">Biography</option>
+            </select></div>
+          <div class="field"><label for="publisher">Publisher</label><input id="publisher" /></div>
+        </div>
+        <div class="form-row">
+          <div class="field"><label for="year">Year</label><input id="year" type="number" min="1400" max="2100" /></div>
+          <div class="field"><label for="total_copies">Total copies *</label>
+            <input id="total_copies" type="number" min="1" value="1" required /></div>
+        </div>
+        <div class="modal-foot">
+          <button type="button" class="btn btn-light" data-close="true">Cancel</button>
+          <button type="submit" class="btn" id="save-btn">Save book</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script type="module" src="js/books.js"></script>
+</body>
+</html>

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dashboard | SchoolLib Library Management System</title>
+  <meta name="description" content="Dashboard of the school library management system: books, students, loans and overdue books." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <aside class="sidebar"></aside>
+  <div class="backdrop"></div>
+
+  <div class="main">
+    <header class="topbar">
+      <button class="hamburger" aria-label="Open menu">☰</button>
+      <div>
+        <h1>Dashboard</h1>
+        <p>An overview of the school library today</p>
+      </div>
+      <div class="topbar-actions">
+        <a class="btn" href="borrowing.html">Issue a book</a>
+      </div>
+    </header>
+
+    <main class="content">
+      <!-- Stat cards -->
+      <section class="grid grid-4" id="stats">
+        <div class="card"><div class="stat"><div class="stat-icon">📘</div>
+          <div><div class="stat-value" id="stat-books">–</div><div class="stat-label">Total books</div></div></div></div>
+        <div class="card"><div class="stat"><div class="stat-icon green">🎓</div>
+          <div><div class="stat-value" id="stat-students">–</div><div class="stat-label">Total students</div></div></div></div>
+        <div class="card"><div class="stat"><div class="stat-icon amber">📤</div>
+          <div><div class="stat-value" id="stat-borrowed">–</div><div class="stat-label">Currently borrowed</div></div></div></div>
+        <div class="card"><div class="stat"><div class="stat-icon red">⏰</div>
+          <div><div class="stat-value" id="stat-overdue">–</div><div class="stat-label">Overdue</div></div></div></div>
+      </section>
+
+      <div class="grid grid-2">
+        <section class="card">
+          <div class="card-head"><h2>Books by category</h2></div>
+          <div id="chart"></div>
+        </section>
+        <section class="card">
+          <div class="card-head"><h2>Overdue books</h2><span class="spacer"></span>
+            <a class="btn btn-light btn-sm" href="borrowing.html">See all</a></div>
+          <div id="overdue-list"></div>
+        </section>
+      </div>
+
+      <section class="card">
+        <div class="card-head"><h2>Recently issued</h2></div>
+        <div id="recent"></div>
+      </section>
+    </main>
+
+    <footer class="page-footer">SchoolLib &mdash; Library Management System school project.</footer>
+  </div>
+
+  <script type="module" src="js/dashboard.js"></script>
+</body>
+</html>

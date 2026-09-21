@@ -23,6 +23,7 @@ let editingId = null; // null = adding a new book
 document.getElementById("add-btn").addEventListener("click", () => openForm());
 document.getElementById("print-btn").addEventListener("click", () => window.print());
 searchInput.addEventListener("input", draw);
+tableBox.addEventListener("click", onTableClick); // wired once
 categoryFilter.addEventListener("change", draw);
 form.addEventListener("submit", saveBook);
 
@@ -110,9 +111,6 @@ function draw() {
       },
     ],
   });
-
-  // Wire the row buttons (they are re-created every time the table draws)
-  tableBox.addEventListener("click", onTableClick);
 }
 
 function onTableClick(event) {

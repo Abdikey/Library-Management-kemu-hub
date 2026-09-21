@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Students | SchoolLib Library Management System</title>
+  <meta name="description" content="Add, edit, search and delete student records in the school library system." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <aside class="sidebar"></aside>
+  <div class="backdrop"></div>
+
+  <div class="main">
+    <header class="topbar">
+      <button class="hamburger" aria-label="Open menu">☰</button>
+      <div><h1>Students</h1><p>Everyone who may borrow a book</p></div>
+      <div class="topbar-actions">
+        <button class="btn btn-light" id="print-btn">🖨️ Print</button>
+        <button class="btn" id="add-btn">+ Add student</button>
+      </div>
+    </header>
+
+    <main class="content">
+      <section class="card">
+        <div class="card-head toolbar">
+          <input id="search" type="search" placeholder="Search name, admission number or class…" aria-label="Search students" />
+          <label for="class-filter" hidden>Class</label>
+          <select id="class-filter" aria-label="Filter by class"><option value="">All classes</option></select>
+          <span class="spacer"></span>
+          <span class="badge badge-grey" id="count">0 students</span>
+        </div>
+        <div id="table"></div>
+      </section>
+    </main>
+
+    <footer class="page-footer">SchoolLib &mdash; Library Management System school project.</footer>
+  </div>
+
+  <!-- Add / edit student modal -->
+  <div class="modal" id="student-modal" role="dialog" aria-modal="true" aria-labelledby="student-modal-title">
+    <div class="modal-box">
+      <div class="modal-head">
+        <h3 id="student-modal-title">Add student</h3>
+        <button class="modal-close" data-close="true" aria-label="Close">&times;</button>
+      </div>
+      <form id="student-form">
+        <div class="form-row">
+          <div class="field"><label for="full_name">Full name *</label><input id="full_name" required /></div>
+          <div class="field"><label for="admission_no">Admission number * (must be unique)</label><input id="admission_no" required /></div>
+        </div>
+        <div class="form-row">
+          <div class="field"><label for="class">Class *</label>
+            <select id="class" required>
+              <option value="Form 1">Form 1</option>
+              <option value="Form 2">Form 2</option>
+              <option value="Form 3">Form 3</option>
+              <option value="Form 4">Form 4</option>
+            </select></div>
+          <div class="field"><label for="phone">Phone</label><input id="phone" /></div>
+        </div>
+        <div class="field"><label for="email">Email</label><input id="email" type="email" /></div>
+        <div class="modal-foot">
+          <button type="button" class="btn btn-light" data-close="true">Cancel</button>
+          <button type="submit" class="btn" id="save-btn">Save student</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Borrowing history modal -->
+  <div class="modal" id="history-modal" role="dialog" aria-modal="true" aria-labelledby="history-modal-title">
+    <div class="modal-box">
+      <div class="modal-head">
+        <h3 id="history-modal-title">Borrowing history</h3>
+        <button class="modal-close" data-close="true" aria-label="Close">&times;</button>
+      </div>
+      <div id="history-body"></div>
+      <div class="modal-foot">
+        <button type="button" class="btn btn-light" data-close="true">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="js/students.js"></script>
+</body>
+</html>

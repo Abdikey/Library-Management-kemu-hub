@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Borrowing | SchoolLib Library Management System</title>
+  <meta name="description" content="Issue books to students, return books and see fines for overdue books." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <aside class="sidebar"></aside>
+  <div class="backdrop"></div>
+
+  <div class="main">
+    <header class="topbar">
+      <button class="hamburger" aria-label="Open menu">☰</button>
+      <div><h1>Borrowing</h1><p>Issue books, accept returns and check fines</p></div>
+      <div class="topbar-actions">
+        <button class="btn btn-light" id="print-btn">🖨️ Print</button>
+        <button class="btn" id="issue-btn">+ Issue a book</button>
+      </div>
+    </header>
+
+    <main class="content">
+      <section class="grid grid-4">
+        <div class="card"><div class="stat"><div class="stat-icon amber">📤</div>
+          <div><div class="stat-value" id="stat-borrowed">–</div><div class="stat-label">Currently borrowed</div></div></div></div>
+        <div class="card"><div class="stat"><div class="stat-icon red">⏰</div>
+          <div><div class="stat-value" id="stat-overdue">–</div><div class="stat-label">Overdue</div></div></div></div>
+        <div class="card"><div class="stat"><div class="stat-icon green">📥</div>
+          <div><div class="stat-value" id="stat-returned">–</div><div class="stat-label">Returned</div></div></div></div>
+        <div class="card"><div class="stat"><div class="stat-icon">💰</div>
+          <div><div class="stat-value" id="stat-fines">–</div><div class="stat-label">Fines collected</div></div></div></div>
+      </section>
+
+      <section class="card">
+        <div class="card-head toolbar">
+          <input id="search" type="search" placeholder="Search book, student or admission number…" aria-label="Search loans" />
+          <label for="status-filter" hidden>Status</label>
+          <select id="status-filter" aria-label="Filter by status">
+            <option value="">All records</option>
+            <option value="borrowed">Borrowed (not returned)</option>
+            <option value="overdue">Overdue only</option>
+            <option value="returned">Returned</option>
+          </select>
+          <span class="spacer"></span>
+          <span class="badge badge-grey" id="count">0 records</span>
+        </div>
+        <div id="table"></div>
+      </section>
+    </main>
+
+    <footer class="page-footer">SchoolLib &mdash; Library Management System school project.</footer>
+  </div>
+
+  <!-- Issue book modal -->
+  <div class="modal" id="issue-modal" role="dialog" aria-modal="true" aria-labelledby="issue-modal-title">
+    <div class="modal-box">
+      <div class="modal-head">
+        <h3 id="issue-modal-title">Issue a book</h3>
+        <button class="modal-close" data-close="true" aria-label="Close">&times;</button>
+      </div>
+      <form id="issue-form">
+        <div class="field"><label for="student_id">Student *</label>
+          <select id="student_id" required></select></div>
+        <div class="field"><label for="book_id">Book (only available books are listed) *</label>
+          <select id="book_id" required></select></div>
+        <div class="form-row">
+          <div class="field"><label for="issue_date">Issue date *</label><input id="issue_date" type="date" required /></div>
+          <div class="field"><label for="due_date">Due date *</label><input id="due_date" type="date" required /></div>
+        </div>
+        <p class="hint" id="rules-hint"></p>
+        <div class="modal-foot">
+          <button type="button" class="btn btn-light" data-close="true">Cancel</button>
+          <button type="submit" class="btn" id="issue-save-btn">Issue book</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Return book modal -->
+  <div class="modal" id="return-modal" role="dialog" aria-modal="true" aria-labelledby="return-modal-title">
+    <div class="modal-box">
+      <div class="modal-head">
+        <h3 id="return-modal-title">Return a book</h3>
+        <button class="modal-close" data-close="true" aria-label="Close">&times;</button>
+      </div>
+      <form id="return-form">
+        <div id="return-summary"></div>
+        <div class="field"><label for="return_date">Return date *</label><input id="return_date" type="date" required /></div>
+        <div class="notice" id="fine-box"></div>
+        <div class="modal-foot">
+          <button type="button" class="btn btn-light" data-close="true">Cancel</button>
+          <button type="submit" class="btn" id="return-save-btn">Confirm return</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script type="module" src="js/borrowing.js"></script>
+</body>
+</html>

@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Documentation | SchoolLib Library Management System</title>
+  <meta name="description" content="Setup guide, database design, library rules and a project report for the SchoolLib library management system." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <aside class="sidebar"></aside>
+  <div class="backdrop"></div>
+
+  <div class="main">
+    <header class="topbar">
+      <button class="hamburger" aria-label="Open menu">☰</button>
+      <div><h1>Documentation</h1><p>How the project is built and how to run it</p></div>
+      <div class="topbar-actions">
+        <button class="btn btn-light" id="print-btn">🖨️ Print</button>
+      </div>
+    </header>
+
+    <main class="content doc">
+      <section class="card">
+        <div class="card-head"><h2>Contents</h2></div>
+        <nav class="toc">
+          <a href="#overview">1. Project overview</a>
+          <a href="#setup">2. Setup guide</a>
+          <a href="#database">3. Database design</a>
+          <a href="#rules">4. Library rules</a>
+          <a href="#files">5. File structure</a>
+          <a href="#howitworks">6. How the main features work</a>
+          <a href="#security">7. Security note</a>
+          <a href="#testing">8. Testing checklist</a>
+        </nav>
+      </section>
+
+      <section class="card" id="overview">
+        <div class="card-head"><h2>1. Project overview</h2></div>
+        <p>SchoolLib is a library management system for a school. A librarian can keep a
+        catalogue of books, a register of students, issue books, accept returns and see
+        which books are late.</p>
+        <p>It is built with plain HTML, CSS and JavaScript (ES6 modules). There is no
+        framework and nothing to install or compile. The data is stored in a Supabase
+        (PostgreSQL) database, which the pages talk to using the Supabase JavaScript
+        client loaded from a CDN.</p>
+      </section>
+
+      <section class="card" id="setup">
+        <div class="card-head"><h2>2. Setup guide</h2></div>
+        <ol>
+          <li>Create a free account at <a href="https://supabase.com" target="_blank" rel="noopener">supabase.com</a> and create a new project.</li>
+          <li>In the project, open <strong>SQL Editor → New query</strong>, paste everything
+          from <code>sql/schema.sql</code> and click <strong>Run</strong>. This creates the
+          tables, triggers, the view and the sample data.</li>
+          <li>Open <strong>Project Settings → API</strong> and copy the <em>Project URL</em>
+          and the <em>anon public</em> key.</li>
+          <li>Paste both into <code>js/config.js</code>:
+            <pre><code>export const SUPABASE_URL = "https://xxxx.supabase.co";
+export const SUPABASE_ANON_KEY = "eyJhbGciOi...";</code></pre>
+          </li>
+          <li>Open <code>index.html</code> in a browser, or serve the folder with any
+          static server, for example <code>python -m http.server</code>.</li>
+        </ol>
+        <p class="hint">If the keys are still the placeholders, every page shows a yellow
+        warning at the top and no data will load.</p>
+      </section>
+
+      <section class="card" id="database">
+        <div class="card-head"><h2>3. Database design</h2></div>
+        <h3>books</h3>
+        <ul>
+          <li><code>id</code> — unique identifier</li>
+          <li><code>title</code>, <code>author</code>, <code>category</code>, <code>publisher</code>, <code>year</code></li>
+          <li><code>isbn</code> — unique, so the same book cannot be added twice</li>
+          <li><code>total_copies</code> — how many copies the library owns</li>
+          <li><code>available_copies</code> — how many are on the shelf right now</li>
+        </ul>
+        <h3>students</h3>
+        <ul>
+          <li><code>admission_no</code> — unique for every student</li>
+          <li><code>full_name</code>, <code>class</code>, <code>email</code>, <code>phone</code></li>
+        </ul>
+        <h3>borrowings</h3>
+        <ul>
+          <li><code>book_id</code> and <code>student_id</code> — links to the two tables above</li>
+          <li><code>issue_date</code>, <code>due_date</code>, <code>return_date</code></li>
+          <li><code>status</code> — only <code>borrowed</code> or <code>returned</code></li>
+          <li><code>fine_amount</code> — money owed for a late return</li>
+        </ul>
+        <h3>Triggers and the view</h3>
+        <ul>
+          <li>Inserting a borrowing takes one copy off the shelf automatically.</li>
+          <li>Filling in a return date puts the copy back and sets the status to <code>returned</code>.</li>
+          <li><code>borrowings_view</code> joins the three tables and calculates
+          <code>is_overdue</code> every time it is read, so "overdue" is never stored
+          and can never be out of date.</li>
+        </ul>
+        <p>Because the database does this work, the JavaScript never edits
+        <code>available_copies</code> itself and the numbers cannot drift.</p>
+      </section>
+
+      <section class="card" id="rules">
+        <div class="card-head"><h2>4. Library rules</h2></div>
+        <p>All the rules live in <code>js/config.js</code>, so a school can change them in one place.</p>
+        <ul>
+          <li>Loan period: <strong id="rule-loan">–</strong></li>
+          <li>Fine for a late return: <strong id="rule-fine">–</strong></li>
+          <li>Borrowing limit: <strong id="rule-max">–</strong></li>
+          <li>A student cannot hold two copies of the same title at once.</li>
+          <li>A book with no free copy cannot be issued.</li>
+        </ul>
+        <p>The fine is <code>days late × fine per day</code>. A book returned on or before
+        its due date has no fine.</p>
+      </section>
+
+      <section class="card" id="files">
+        <div class="card-head"><h2>5. File structure</h2></div>
+        <pre><code>library/
+├── index.html           Dashboard
+├── books.html           Book catalogue
+├── students.html        Student register
+├── borrowing.html       Issue and return books
+├── documentation.html   This page
+├── css/style.css        All styling
+├── js/config.js         Keys and library rules
+├── js/app.js            Shared helpers (table, modals, toasts, dates)
+├── js/dashboard.js
+├── js/books.js
+├── js/students.js
+├── js/borrowing.js
+├── js/documentation.js
+└── sql/schema.sql       Tables, triggers, view, sample data</code></pre>
+      </section>
+
+      <section class="card" id="howitworks">
+        <div class="card-head"><h2>6. How the main features work</h2></div>
+        <h3>Shared code</h3>
+        <p><code>js/app.js</code> holds everything used by more than one page: the sidebar,
+        the sortable and paginated table, modals, toast messages, date helpers and a
+        function that escapes text before it is put into the page. Nothing is copied
+        between pages.</p>
+        <h3>Issuing a book</h3>
+        <ol>
+          <li>The form only lists books that still have a free copy.</li>
+          <li>The borrowing limit and the duplicate-title rule are checked.</li>
+          <li>The free copy is checked once more against the database, in case somebody
+          else took the last one.</li>
+          <li>The row is inserted and the trigger updates the shelf count.</li>
+        </ol>
+        <h3>Returning a book</h3>
+        <p>The fine is worked out from the return date before saving, and is shown in the
+        dialog so the librarian can see it first. Saving the return date makes the
+        trigger put the copy back on the shelf.</p>
+        <h3>Searching, sorting and printing</h3>
+        <p>Search and filters run in the browser on data already loaded, so they feel
+        instant. Every table header can be clicked to sort, and each page has a print
+        button that hides the menu, buttons and pagination.</p>
+      </section>
+
+      <section class="card" id="security">
+        <div class="card-head"><h2>7. Security note</h2></div>
+        <p>There is no login in this project, so Row Level Security policies allow anyone
+        with the anon key to read and write. That is acceptable for a classroom demo.</p>
+        <p>A real library system would add Supabase authentication and restrict adding,
+        editing and deleting to librarian accounts, while students would only be able to
+        read the catalogue.</p>
+      </section>
+
+      <section class="card" id="testing">
+        <div class="card-head"><h2>8. Testing checklist</h2></div>
+        <ul>
+          <li>Add a book with an ISBN that already exists — a clear message appears.</li>
+          <li>Add a student with a repeated admission number — a clear message appears.</li>
+          <li>Issue a book and check the available copies drop by one.</li>
+          <li>Issue a fourth book to the same student — it is refused by the limit.</li>
+          <li>Return a book with a past due date — the fine is calculated and shown.</li>
+          <li>Try to delete a book or student that has borrowing history — it is refused.</li>
+          <li>Open the app on a phone-sized window — the menu becomes a hamburger.</li>
+        </ul>
+      </section>
+    </main>
+
+    <footer class="page-footer">SchoolLib &mdash; Library Management System school project.</footer>
+  </div>
+
+  <script type="module" src="js/documentation.js"></script>
+</body>
+</html>

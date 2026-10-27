@@ -10,8 +10,8 @@
    4. Copy the "anon public" key into SUPABASE_ANON_KEY below.
    ============================================================ */
 
-export const SUPABASE_URL = "https://YOUR-PROJECT-ID.supabase.co";
-export const SUPABASE_ANON_KEY = "YOUR-ANON-PUBLIC-KEY";
+export const SUPABASE_URL = "https://tkysqvuzwhjaunxwhhau.supabase.co";
+export const SUPABASE_ANON_KEY = "sb_publishable_6PFpSs1hZ9nC7Mt526nBRA_n2wOQvsj";
 
 /* ---------- Library rules (change these if your school differs) ---------- */
 export const LOAN_DAYS = 14; // how many days a student may keep a book

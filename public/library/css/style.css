@@ -276,6 +276,9 @@ tbody tr:hover { background: var(--primary-light); }
   padding: .9rem 1rem; border-radius: var(--radius); margin-bottom: 1.25rem;
 }
 .notice code { background: rgba(0,0,0,.06); padding: .1rem .3rem; border-radius: 4px; }
+.payment-summary { margin: 1rem 0; padding: .85rem 0; border-bottom: 1px solid var(--border); }
+.payment-summary p { margin: 0; }
+.payment-amount { color: var(--success); font-size: 1.5rem; font-weight: 700; }
 
 /* ------------------------- Documentation page ------------------------- */
 .docs { display: grid; grid-template-columns: 240px 1fr; gap: 1.5rem; align-items: start; }

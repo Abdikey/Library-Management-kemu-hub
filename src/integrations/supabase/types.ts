@@ -14,7 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      fine_payments: {
+        Row: {
+          amount: number
+          borrowing_id: string
+          checkout_request_id: string | null
+          created_at: string
+          id: string
+          mpesa_receipt: string | null
+          phone_last3: string
+          result_desc: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          borrowing_id: string
+          checkout_request_id?: string | null
+          created_at?: string
+          id?: string
+          mpesa_receipt?: string | null
+          phone_last3: string
+          result_desc?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          borrowing_id?: string
+          checkout_request_id?: string | null
+          created_at?: string
+          id?: string
+          mpesa_receipt?: string | null
+          phone_last3?: string
+          result_desc?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

@@ -10,33 +10,76 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ApiPublicFinesCallbackRouteImport } from './routes/api/public/fines/callback'
+import { Route as ApiPublicFinesPayRouteImport } from './routes/api/public/fines/pay'
+import { Route as ApiPublicFinesStatusRouteImport } from './routes/api/public/fines/status'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicFinesCallbackRoute = ApiPublicFinesCallbackRouteImport.update({
+  id: '/api/public/fines/callback',
+  path: '/api/public/fines/callback',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicFinesPayRoute = ApiPublicFinesPayRouteImport.update({
+  id: '/api/public/fines/pay',
+  path: '/api/public/fines/pay',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicFinesStatusRoute = ApiPublicFinesStatusRouteImport.update({
+  id: '/api/public/fines/status',
+  path: '/api/public/fines/status',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/api/public/fines/callback': typeof ApiPublicFinesCallbackRoute
+  '/api/public/fines/pay': typeof ApiPublicFinesPayRoute
+  '/api/public/fines/status': typeof ApiPublicFinesStatusRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/api/public/fines/callback': typeof ApiPublicFinesCallbackRoute
+  '/api/public/fines/pay': typeof ApiPublicFinesPayRoute
+  '/api/public/fines/status': typeof ApiPublicFinesStatusRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/api/public/fines/callback': typeof ApiPublicFinesCallbackRoute
+  '/api/public/fines/pay': typeof ApiPublicFinesPayRoute
+  '/api/public/fines/status': typeof ApiPublicFinesStatusRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/api/public/fines/callback'
+    | '/api/public/fines/pay'
+    | '/api/public/fines/status'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/api/public/fines/callback'
+    | '/api/public/fines/pay'
+    | '/api/public/fines/status'
+  id:
+    | '__root__'
+    | '/'
+    | '/api/public/fines/callback'
+    | '/api/public/fines/pay'
+    | '/api/public/fines/status'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ApiPublicFinesCallbackRoute: typeof ApiPublicFinesCallbackRoute
+  ApiPublicFinesPayRoute: typeof ApiPublicFinesPayRoute
+  ApiPublicFinesStatusRoute: typeof ApiPublicFinesStatusRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +91,35 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/fines/callback': {
+      id: '/api/public/fines/callback'
+      path: '/api/public/fines/callback'
+      fullPath: '/api/public/fines/callback'
+      preLoaderRoute: typeof ApiPublicFinesCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/fines/pay': {
+      id: '/api/public/fines/pay'
+      path: '/api/public/fines/pay'
+      fullPath: '/api/public/fines/pay'
+      preLoaderRoute: typeof ApiPublicFinesPayRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/fines/status': {
+      id: '/api/public/fines/status'
+      path: '/api/public/fines/status'
+      fullPath: '/api/public/fines/status'
+      preLoaderRoute: typeof ApiPublicFinesStatusRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ApiPublicFinesCallbackRoute: ApiPublicFinesCallbackRoute,
+  ApiPublicFinesPayRoute: ApiPublicFinesPayRoute,
+  ApiPublicFinesStatusRoute: ApiPublicFinesStatusRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -16,6 +16,7 @@ import {
 initLayout("borrowing.html");
 wireModal("issue-modal");
 wireModal("return-modal");
+wireModal("payment-modal");
 
 const tableBox = document.getElementById("table");
 const searchInput = document.getElementById("search");
@@ -23,11 +24,15 @@ const statusFilter = document.getElementById("status-filter");
 const countBadge = document.getElementById("count");
 const issueForm = document.getElementById("issue-form");
 const returnForm = document.getElementById("return-form");
+const paymentForm = document.getElementById("payment-form");
 
 let allLoans = [];
 let books = [];
 let students = [];
 let returning = null; // the loan being returned
+let paying = null;
+let paymentTimer = null;
+let paidFineIds = new Set();
 
 document.getElementById("issue-btn").addEventListener("click", openIssueForm);
 document.getElementById("print-btn").addEventListener("click", () => window.print());
@@ -35,6 +40,7 @@ searchInput.addEventListener("input", draw);
 statusFilter.addEventListener("change", draw);
 issueForm.addEventListener("submit", issueBook);
 returnForm.addEventListener("submit", returnBook);
+paymentForm.addEventListener("submit", startFinePayment);
 issueForm.issue_date.addEventListener("change", () => {
   issueForm.due_date.value = addDays(issueForm.issue_date.value || today(), LOAN_DAYS);
 });
@@ -63,6 +69,16 @@ async function loadAll() {
     allLoans = loansRes.data || [];
     books = booksRes.data || [];
     students = studentsRes.data || [];
+
+    try {
+      const response = await fetch("/api/public/fines/status");
+      if (response.ok) {
+        const data = await response.json();
+        paidFineIds = new Set((data.paid || []).map((item) => item.borrowing_id));
+      }
+    } catch {
+      paidFineIds = new Set();
+    }
 
     drawStats();
     draw();
@@ -163,7 +179,9 @@ function draw() {
         sortable: false,
         render: (l) =>
           l.status === "returned"
-            ? `<span class="cell-sub">—</span>`
+            ? Number(l.fine_amount) > 0 && !paidFineIds.has(l.id)
+              ? `<span class="no-print"><button class="btn btn-sm btn-success" data-pay="${l.id}">${money(l.fine_amount)} · Pay fine</button></span>`
+              : `<span class="cell-sub">${paidFineIds.has(l.id) ? "Paid" : "—"}</span>`
             : `<span class="no-print"><button class="btn btn-sm" data-return="${l.id}">Return</button></span>`,
       },
     ],
@@ -171,8 +189,88 @@ function draw() {
 }
 
 function onTableClick(event) {
-  const id = event.target.dataset.return;
-  if (id) openReturnForm(allLoans.find((l) => l.id === id));
+  const target = event.target.closest("button");
+  if (!target) return;
+  const returnId = target.dataset.return;
+  if (returnId) openReturnForm(allLoans.find((l) => l.id === returnId));
+  const payId = target.dataset.pay;
+  if (payId) openPaymentForm(allLoans.find((l) => l.id === payId));
+}
+
+/* ---------- M-Pesa fine payment ---------- */
+function openPaymentForm(loan) {
+  if (!loan || Number(loan.fine_amount) <= 0 || paidFineIds.has(loan.id)) return;
+  paying = loan;
+  paymentForm.reset();
+  document.getElementById("payment-summary").innerHTML = `
+    <p><strong>${escapeHtml(loan.student_name)}</strong> · ${escapeHtml(loan.book_title)}</p>
+    <p class="payment-amount">${money(loan.fine_amount)}</p>`;
+  document.getElementById("payment-progress").textContent = "";
+  document.getElementById("payment-submit").disabled = false;
+  openModal("payment-modal");
+}
+
+async function startFinePayment(event) {
+  event.preventDefault();
+  if (!paying) return;
+  const submit = document.getElementById("payment-submit");
+  const progress = document.getElementById("payment-progress");
+  submit.disabled = true;
+  submit.textContent = "Sending…";
+
+  try {
+    const response = await fetch("/api/public/fines/pay", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ borrowingId: paying.id, phone: document.getElementById("payment-phone").value }),
+    });
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error || "Could not start the payment.");
+
+    progress.textContent = `A test prompt was sent for ${money(result.amount)}. Approve it on the phone to finish.`;
+    submit.textContent = "Waiting for payment…";
+    if (paymentTimer) clearInterval(paymentTimer);
+    let checks = 0;
+    paymentTimer = setInterval(async () => {
+      checks += 1;
+      try {
+        const statusResponse = await fetch(`/api/public/fines/status?id=${encodeURIComponent(result.paymentId)}`);
+        const status = await statusResponse.json();
+        if (status.status === "paid") {
+          clearInterval(paymentTimer);
+          paymentTimer = null;
+          closeModal("payment-modal");
+          toast(status.receipt ? `Fine paid. Receipt ${status.receipt}.` : "Fine paid successfully.", "success");
+          paying = null;
+          await loadAll();
+        } else if (status.status === "failed") {
+          clearInterval(paymentTimer);
+          paymentTimer = null;
+          progress.textContent = status.message || "Payment was not completed. You can try again.";
+          submit.disabled = false;
+          submit.textContent = "Try again";
+        } else if (checks >= 30) {
+          clearInterval(paymentTimer);
+          paymentTimer = null;
+          progress.textContent = "Still awaiting Safaricom. Check the phone, then close this window and refresh the borrowing list.";
+          submit.disabled = false;
+          submit.textContent = "Send another prompt";
+        }
+      } catch {
+        if (checks >= 30) {
+          clearInterval(paymentTimer);
+          paymentTimer = null;
+          progress.textContent = "Could not confirm the payment yet. Check the phone and refresh the borrowing list shortly.";
+          submit.disabled = false;
+          submit.textContent = "Try again";
+        }
+      }
+    }, 3000);
+  } catch (error) {
+    progress.textContent = error instanceof Error ? error.message : "Could not start the payment.";
+    submit.disabled = false;
+    submit.textContent = "Try again";
+  }
 }
 
 /* ---------- Issue a book ---------- */

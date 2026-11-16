@@ -10,12 +10,21 @@ const cors = {
 const json = (b: unknown, status = 200) => Response.json(b, { status, headers: cors });
 
 const Body = z.object({ borrowingId: z.string().uuid(), phone: z.string().min(9).max(16) });
+const ALLOWED_ORIGINS = new Set([
+  "http://localhost:8080",
+  "https://id-preview--bcc1cd8c-1c16-4753-965b-8a3b6084953a.lovable.app",
+  "https://project--bcc1cd8c-1c16-4753-965b-8a3b6084953a-dev.lovable.app",
+  "https://project--bcc1cd8c-1c16-4753-965b-8a3b6084953a.lovable.app",
+  "https://read-return-hub.lovable.app",
+]);
 
 export const Route = createFileRoute("/api/public/fines/pay")({
   server: {
     handlers: {
       OPTIONS: async () => new Response(null, { status: 204, headers: cors }),
       POST: async ({ request }) => {
+        const origin = request.headers.get("origin");
+        if (!origin || !ALLOWED_ORIGINS.has(origin)) return json({ error: "Payment requests must come from the SchoolLib app." }, 403);
         const parsed = Body.safeParse(await request.json().catch(() => null));
         if (!parsed.success) return json({ error: "Invalid request." }, 400);
         const phone = normalizeKenyanPhone(parsed.data.phone);
@@ -33,6 +42,11 @@ export const Route = createFileRoute("/api/public/fines/pay")({
           const { data: paid } = await supabaseAdmin
             .from("fine_payments").select("id").eq("borrowing_id", loan.id).eq("status", "paid").maybeSingle();
           if (paid) return json({ error: "This fine has already been paid." }, 409);
+
+          const { data: recent } = await supabaseAdmin
+            .from("fine_payments").select("id,status,created_at").eq("borrowing_id", loan.id)
+            .gte("created_at", new Date(Date.now() - 60000).toISOString()).order("created_at", { ascending: false }).limit(1).maybeSingle();
+          if (recent) return json({ error: "Please wait one minute before trying this fine again." }, 429);
 
           // Claim this fine before sending a prompt. The partial unique index
           // prevents parallel attempts from charging the same assessed fine.
@@ -61,7 +75,10 @@ export const Route = createFileRoute("/api/public/fines/pay")({
           return json({ paymentId: row.id, amount });
         } catch (e) {
           console.error("pay failed", e);
-          return json({ error: e instanceof Error ? e.message : "Payment could not start." }, 502);
+          const message = e instanceof Error && e.message.startsWith("M-Pesa is not set up")
+            ? e.message
+            : "Safaricom could not start the test prompt. Check the sandbox setup and try again.";
+          return json({ error: message }, 502);
         }
       },
     },

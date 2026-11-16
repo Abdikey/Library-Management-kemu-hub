@@ -13,6 +13,7 @@ build tools, nothing to compile.
 - **Students** — add, edit, delete, search, filter by class, per-student borrowing history.
 - **Borrowing** — issue a book, accept returns, automatic fine calculation, status
   badges for borrowed / overdue / returned.
+- **Fine payments** — M-Pesa sandbox test prompts for returned books with fines.
 - Sortable, paginated tables; toast messages; friendly error messages; print-friendly
   pages; responsive layout with a mobile menu.
 
@@ -84,3 +85,12 @@ library/
 There is no login, so the Row Level Security policies allow anyone with the anon key to
 read and write — fine for a classroom demo. A real system would add authentication and
 restrict write access to librarian accounts.
+
+## M-Pesa sandbox test setup
+
+Fine payment prompts use the Safaricom Daraja sandbox; they do not collect real money.
+Create a sandbox app with M-PESA Express enabled in the [Daraja Developer Portal](https://developer.safaricom.co.ke/).
+Add `DARAJA_CONSUMER_KEY`, `DARAJA_CONSUMER_SECRET` and `DARAJA_PASSKEY` using Lovable's
+secure project secrets form. Use sandbox credentials and test after the app is deployed,
+so Safaricom can reach the payment callback. The app checks the payment result with
+Safaricom before marking the fine as paid.

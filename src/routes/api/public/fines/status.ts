@@ -3,7 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 const cors = { "Access-Control-Allow-Origin": "*" };
 
 // GET ?id=<paymentId> -> status of one payment
-// GET (no id)          -> list of borrowing ids whose fines are paid
+// GET ?borrowing_ids=... -> paid ids from the currently displayed loan list
 export const Route = createFileRoute("/api/public/fines/status")({
   server: {
     handlers: {
@@ -11,7 +11,12 @@ export const Route = createFileRoute("/api/public/fines/status")({
         const id = new URL(request.url).searchParams.get("id");
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
         if (!id) {
-          const { data } = await supabaseAdmin.from("fine_payments").select("borrowing_id,mpesa_receipt").eq("status", "paid");
+          const ids = (new URL(request.url).searchParams.get("borrowing_ids") ?? "").split(",").filter(Boolean);
+          if (!ids.length || ids.length > 100 || ids.some((value) => !/^[0-9a-f-]{36}$/i.test(value))) {
+            return Response.json({ paid: [] }, { headers: cors });
+          }
+          const { data } = await supabaseAdmin
+            .from("fine_payments").select("borrowing_id").eq("status", "paid").in("borrowing_id", ids);
           return Response.json({ paid: data ?? [] }, { headers: cors });
         }
         if (!/^[0-9a-f-]{36}$/i.test(id)) return Response.json({ error: "Bad id" }, { status: 400, headers: cors });

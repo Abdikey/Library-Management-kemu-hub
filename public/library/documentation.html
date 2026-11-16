@@ -156,6 +156,12 @@ export const SUPABASE_ANON_KEY = "eyJhbGciOi...";</code></pre>
         <p>The fine is worked out from the return date before saving, and is shown in the
         dialog so the librarian can see it first. Saving the return date makes the
         trigger put the copy back on the shelf.</p>
+        <h3>Paying a fine</h3>
+        <p>For returned books with a fine, choose <strong>Pay fine</strong>, enter a Safaricom
+        number and approve the M-Pesa prompt. This school-project setup uses the Daraja
+        sandbox only; test payments are not real collections. Add sandbox credentials in
+        Lovable's secure project secrets before testing. A payment is marked paid only
+        after Safaricom confirms it.</p>
         <h3>Searching, sorting and printing</h3>
         <p>Search and filters run in the browser on data already loaded, so they feel
         instant. Every table header can be clicked to sort, and each page has a print

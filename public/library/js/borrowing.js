@@ -71,7 +71,8 @@ async function loadAll() {
     students = studentsRes.data || [];
 
     try {
-      const response = await fetch("/api/public/fines/status");
+      const loanIds = allLoans.map((loan) => loan.id).join(",");
+      const response = await fetch(`/api/public/fines/status?borrowing_ids=${encodeURIComponent(loanIds)}`);
       if (response.ok) {
         const data = await response.json();
         paidFineIds = new Set((data.paid || []).map((item) => item.borrowing_id));

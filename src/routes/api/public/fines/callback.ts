@@ -16,12 +16,13 @@ export const Route = createFileRoute("/api/public/fines/callback")({
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
         const { queryStk } = await import("@/lib/mpesa.server");
         const { data: row } = await supabaseAdmin
-          .from("fine_payments").select("id,status").eq("checkout_request_id", checkoutId).maybeSingle();
+          .from("fine_payments").select("id,status,amount").eq("checkout_request_id", checkoutId).maybeSingle();
         if (!row || row.status !== "pending") return ok();
 
         const verified = await queryStk(checkoutId);
-        const success = String(verified.ResultCode) === "0";
         const items: { Name: string; Value?: unknown }[] = cb?.CallbackMetadata?.Item ?? [];
+        const amount = Number(items.find((i) => i.Name === "Amount")?.Value);
+        const success = String(verified.ResultCode) === "0" && amount === Number(row.amount);
         const receipt = items.find((i) => i.Name === "MpesaReceiptNumber")?.Value;
         await supabaseAdmin.from("fine_payments").update({
           status: success ? "paid" : "failed",

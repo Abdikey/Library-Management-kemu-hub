@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX fine_payments_one_pending ON public.fine_payments(borrowing_id) WHERE status = 'pending';

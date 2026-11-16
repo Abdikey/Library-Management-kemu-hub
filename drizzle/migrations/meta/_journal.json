@@ -8,6 +8,13 @@
       "when": 1794749514314,
       "tag": "0000_create_fine_payments",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1794831557263,
+      "tag": "0001_prevent_duplicate_pending_fines",
+      "breakpoints": true
     }
   ]
 }

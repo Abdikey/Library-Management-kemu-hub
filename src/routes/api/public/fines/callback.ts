@@ -20,6 +20,8 @@ export const Route = createFileRoute("/api/public/fines/callback")({
         if (!row || row.status !== "pending") return ok();
 
         const verified = await queryStk(checkoutId);
+        // An unfinished query response is not proof of success or failure.
+        if (verified.ResultCode === undefined) return ok();
         const items: { Name: string; Value?: unknown }[] = cb?.CallbackMetadata?.Item ?? [];
         const amount = Number(items.find((i) => i.Name === "Amount")?.Value);
         const success = String(verified.ResultCode) === "0" && amount === Number(row.amount);

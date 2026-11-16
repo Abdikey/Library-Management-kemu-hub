@@ -8,7 +8,7 @@ Build a simple, professional Library Management System for a school project.
 - Use the Supabase JavaScript client via CDN:
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 - Put the Supabase URL and anon key in one file, js/config.js, so they are easy to change.
-- Use Supabase (free tier) as the database. No custom backend.
+- Use the existing library database, with a small secure server for M-Pesa payments.
 - Use Google Fonts (Inter) and simple inline SVG icons or Font Awesome via CDN.
 
 ## FILE STRUCTURE
@@ -71,7 +71,14 @@ Add clear instructions at the top of the file on how to run it in the Supabase S
 5. Tables: sortable columns (click a header to sort ascending/descending) and pagination of PAGE_SIZE rows per page, implemented as reusable helpers in js/app.js.
 6. Validation and feedback: required fields, unique ISBN and admission number errors handled gracefully, confirm before delete, prevent deleting a book or student with borrowing records (explain why), toast notifications, loading spinners, and empty states ("No books found").
 
-Do NOT add: user authentication, roles, payments, email/SMS, barcode scanning, or export features. Keep it beginner-friendly.
+## M-Pesa sandbox setup
+
+Fine payment prompts use Safaricom's Daraja sandbox only; this does not collect real money.
+Create a sandbox app with M-PESA Express enabled in the [Daraja Developer Portal](https://developer.safaricom.co.ke/).
+Add `DARAJA_CONSUMER_KEY`, `DARAJA_CONSUMER_SECRET`, and `DARAJA_PASSKEY` through the secure project secrets form.
+Test after publishing so Safaricom can reach the payment callback. The callback confirms the amount and result with Safaricom before the fine is marked paid.
+
+Do NOT add: user authentication, roles, email/SMS, barcode scanning, or export features. Keep it beginner-friendly.
 
 ## DESIGN
 - Modern, clean, professional look: fixed left sidebar (collapses to a hamburger menu on mobile), white cards with soft shadows and 12px rounded corners, generous spacing.

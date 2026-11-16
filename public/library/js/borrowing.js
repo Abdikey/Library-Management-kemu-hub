@@ -268,6 +268,8 @@ async function startFinePayment(event) {
       }
     }, 3000);
   } catch (error) {
+    if (paymentTimer) clearInterval(paymentTimer);
+    paymentTimer = null;
     progress.textContent = error instanceof Error ? error.message : "Could not start the payment.";
     submit.disabled = false;
     submit.textContent = "Try again";

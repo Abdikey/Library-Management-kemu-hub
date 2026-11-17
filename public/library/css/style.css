@@ -231,6 +231,8 @@ tbody tr:hover { background: var(--primary-light); }
   padding: 2rem 1rem; overflow-y: auto; z-index: 60;
 }
 .modal.open { display: flex; }
+#payment-modal { align-items: center; }
+#payment-modal .modal-box { max-height: calc(100vh - 2rem); overflow-y: auto; }
 .modal-box {
   background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow);
   width: 100%; max-width: 540px; padding: 1.25rem;

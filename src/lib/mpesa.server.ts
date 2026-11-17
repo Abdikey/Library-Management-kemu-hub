@@ -86,8 +86,9 @@ export async function getBorrowingFine(borrowingId: string) {
 
 export function callbackUrlFor(request: Request) {
   const origin = new URL(request.url).origin;
-  const base = origin.includes("localhost")
-    ? "https://project--bcc1cd8c-1c16-4753-965b-8a3b6084953a-dev.lovable.app"
-    : origin;
+  const base = origin === "https://read-return-hub.lovable.app"
+    || origin === "https://project--bcc1cd8c-1c16-4753-965b-8a3b6084953a.lovable.app"
+    ? origin
+    : "https://project--bcc1cd8c-1c16-4753-965b-8a3b6084953a-dev.lovable.app";
   return `${base}/api/public/fines/callback`;
 }

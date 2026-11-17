@@ -92,7 +92,9 @@ async function loadAll() {
 function drawStats() {
   const borrowed = allLoans.filter((l) => l.status === "borrowed");
   const returned = allLoans.filter((l) => l.status === "returned");
-  const fines = returned.reduce((sum, l) => sum + Number(l.fine_amount || 0), 0);
+  const fines = returned
+    .filter((l) => paidFineIds.has(l.id))
+    .reduce((sum, l) => sum + Number(l.fine_amount || 0), 0);
   document.getElementById("stat-borrowed").textContent = borrowed.length;
   document.getElementById("stat-overdue").textContent = borrowed.filter((l) => l.is_overdue).length;
   document.getElementById("stat-returned").textContent = returned.length;

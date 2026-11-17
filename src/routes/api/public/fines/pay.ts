@@ -43,11 +43,6 @@ export const Route = createFileRoute("/api/public/fines/pay")({
             .from("fine_payments").select("id").eq("borrowing_id", loan.id).eq("status", "paid").maybeSingle();
           if (paid) return json({ error: "This fine has already been paid." }, 409);
 
-          const { data: recent } = await supabaseAdmin
-            .from("fine_payments").select("id,status,created_at").eq("borrowing_id", loan.id)
-            .gte("created_at", new Date(Date.now() - 60000).toISOString()).order("created_at", { ascending: false }).limit(1).maybeSingle();
-          if (recent) return json({ error: "Please wait one minute before trying this fine again." }, 429);
-
           // Claim this fine before sending a prompt. The partial unique index
           // prevents parallel attempts from charging the same assessed fine.
           const { data: row, error } = await supabaseAdmin

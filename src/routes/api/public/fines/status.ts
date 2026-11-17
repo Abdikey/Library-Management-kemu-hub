@@ -1,6 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-const cors = { "Access-Control-Allow-Origin": "*" };
+const ALLOWED_ORIGINS = new Set([
+  "http://localhost:8080",
+  "https://id-preview--bcc1cd8c-1c16-4753-965b-8a3b6084953a.lovable.app",
+  "https://project--bcc1cd8c-1c16-4753-965b-8a3b6084953a-dev.lovable.app",
+  "https://project--bcc1cd8c-1c16-4753-965b-8a3b6084953a.lovable.app",
+  "https://read-return-hub.lovable.app",
+]);
 
 // GET ?id=<paymentId> -> status of one payment
 // GET ?borrowing_ids=... -> paid ids from the currently displayed loan list
@@ -8,21 +14,26 @@ export const Route = createFileRoute("/api/public/fines/status")({
   server: {
     handlers: {
       GET: async ({ request }) => {
+        const origin = request.headers.get("origin");
+        if ((origin && !ALLOWED_ORIGINS.has(origin)) || (!origin && request.headers.get("sec-fetch-site") !== "same-origin")) {
+          return Response.json({ error: "Request not allowed." }, { status: 403 });
+        }
+        const headers = origin ? { "Access-Control-Allow-Origin": origin, Vary: "Origin" } : {};
         const id = new URL(request.url).searchParams.get("id");
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
         if (!id) {
           const ids = (new URL(request.url).searchParams.get("borrowing_ids") ?? "").split(",").filter(Boolean);
           if (!ids.length || ids.length > 100 || ids.some((value) => !/^[0-9a-f-]{36}$/i.test(value))) {
-            return Response.json({ paid: [] }, { headers: cors });
+            return Response.json({ paid: [] }, { headers });
           }
           const { data } = await supabaseAdmin
             .from("fine_payments").select("borrowing_id").eq("status", "paid").in("borrowing_id", ids);
-          return Response.json({ paid: data ?? [] }, { headers: cors });
+          return Response.json({ paid: data ?? [] }, { headers });
         }
-        if (!/^[0-9a-f-]{36}$/i.test(id)) return Response.json({ error: "Bad id" }, { status: 400, headers: cors });
+        if (!/^[0-9a-f-]{36}$/i.test(id)) return Response.json({ error: "Bad id" }, { status: 400, headers });
         let { data: row } = await supabaseAdmin
           .from("fine_payments").select("id,status,mpesa_receipt,result_desc,checkout_request_id,created_at").eq("id", id).maybeSingle();
-        if (!row) return Response.json({ error: "Not found" }, { status: 404, headers: cors });
+        if (!row) return Response.json({ error: "Not found" }, { status: 404, headers });
 
         // If no callback arrived after 30s, ask Safaricom directly.
         if (row.status === "pending" && row.checkout_request_id && Date.now() - new Date(row.created_at).getTime() > 30000) {
@@ -38,7 +49,7 @@ export const Route = createFileRoute("/api/public/fines/status")({
         }
         return Response.json(
           { status: row.status, receipt: row.mpesa_receipt, message: row.result_desc },
-          { headers: cors },
+          { headers },
         );
       },
     },

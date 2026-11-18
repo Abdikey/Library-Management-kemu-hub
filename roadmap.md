@@ -4,5 +4,6 @@
 - [x] Add a private payment ledger and server-side Safaricom sandbox routes.
 - [x] Add the fine-payment prompt and paid status to the Borrowing page.
 - [x] Save the Daraja sandbox credentials securely.
-- [ ] Validate the updated mobile view and current preview build after the final layout correction.
-- [ ] Commit the completed payment-flow changes.
+- [x] Validate the updated mobile view and current preview build after the final layout correction.
+- [x] Confirm the public callback address accepts Safaricom callback requests.
+- [x] Commit the completed payment-flow changes.
